@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Server Time API",
+    "version": "1.0.0",
+    "description": "An extremely simple API that returns the server's current date and time."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development"
+    }
+  ],
+  "paths": {
+    "/api/time": {
+      "get": {
+        "summary": "Get current server date and time",
+        "operationId": "getServerTime",
+        "tags": ["Time"],
+        "responses": {
+          "200": {
+            "description": "Current server time details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeResponse"
+                },
+                "examples": {
+                  "sample": {
+                    "value": {
+                      "iso": "2025-10-06T19:14:00.000+03:00",
+                      "utc": "Mon, 06 Oct 2025 16:14:00 GMT",
+                      "epochMs": 1760084040000,
+                      "timezone": "+03:00",
+                      "server": {
+                        "hostname": "example-host",
+                        "env": "development"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TimeResponse": {
+        "type": "object",
+        "properties": {
+          "iso": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Local server time in ISO 8601 with offset"
+          },
+          "utc": {
+            "type": "string",
+            "description": "UTC time in RFC 1123 format"
+          },
+          "epochMs": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Milliseconds since Unix epoch"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Server timezone offset from UTC (e.g., +03:00)"
+          },
+          "server": {
+            "type": "object",
+            "properties": {
+              "hostname": { "type": "string" },
+              "env": { "type": "string" }
+            }
+          }
+        },
+        "required": ["iso", "utc", "epochMs", "timezone"]
+      }
+    }
+  }
+}
