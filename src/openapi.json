@@ -1,42 +1,61 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Server Time API",
+    "title": "Сервер времени",
+    "description": "Простой API, который возвращает текущие дату и время сервера. Документация оформлена по лучшим практикам: чёткие схемы, форматы, примеры и версии API.",
     "version": "1.0.0",
-    "description": "An extremely simple API that returns the server's current date and time."
+    "license": { "name": "ISC" }
   },
   "servers": [
-    {
-      "url": "http://localhost:3000",
-      "description": "Local development"
-    }
+    { "url": "http://localhost:3000", "description": "Локальный сервер разработки" }
+  ],
+  "tags": [
+    { "name": "Time", "description": "Операции, связанные со временем сервера" },
+    { "name": "Health", "description": "Здоровье сервиса" }
   ],
   "paths": {
-    "/api/time": {
+    "/api/v1/time": {
       "get": {
-        "summary": "Get current server date and time",
-        "operationId": "getServerTime",
         "tags": ["Time"],
+        "summary": "Получить текущее время сервера",
+        "operationId": "getServerTime",
         "responses": {
           "200": {
-            "description": "Current server time details",
+            "description": "Успешный ответ со временем сервера",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TimeResponse"
-                },
+                "schema": { "$ref": "#/components/schemas/TimeResponse" },
                 "examples": {
-                  "sample": {
+                  "default": {
+                    "summary": "Пример ответа",
                     "value": {
-                      "iso": "2025-10-06T19:14:00.000+03:00",
-                      "utc": "Mon, 06 Oct 2025 16:14:00 GMT",
-                      "epochMs": 1760084040000,
-                      "timezone": "+03:00",
-                      "server": {
-                        "hostname": "example-host",
-                        "env": "development"
-                      }
+                      "iso": "2025-10-06T16:26:00.000Z",
+                      "epochMillis": 1760075160000,
+                      "timezone": "Europe/Moscow",
+                      "utcOffset": "+03:00"
                     }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Проверка работоспособности",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Сервис работает",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthResponse" },
+                "examples": {
+                  "ok": {
+                    "value": { "status": "ok" }
                   }
                 }
               }
@@ -50,34 +69,40 @@
     "schemas": {
       "TimeResponse": {
         "type": "object",
+        "description": "Представление времени на сервере.",
+        "required": ["iso", "epochMillis", "timezone", "utcOffset"],
         "properties": {
           "iso": {
             "type": "string",
             "format": "date-time",
-            "description": "Local server time in ISO 8601 with offset"
+            "description": "Дата и время в формате ISO 8601 (UTC)."
           },
-          "utc": {
-            "type": "string",
-            "description": "UTC time in RFC 1123 format"
-          },
-          "epochMs": {
+          "epochMillis": {
             "type": "integer",
             "format": "int64",
-            "description": "Milliseconds since Unix epoch"
+            "description": "Миллисекунды с 1 января 1970 UTC."
           },
           "timezone": {
             "type": "string",
-            "description": "Server timezone offset from UTC (e.g., +03:00)"
+            "description": "Часовой пояс сервера в формате IANA (например, Europe/Moscow)."
           },
-          "server": {
-            "type": "object",
-            "properties": {
-              "hostname": { "type": "string" },
-              "env": { "type": "string" }
-            }
+          "utcOffset": {
+            "type": "string",
+            "pattern": "^[+-][0-9]{2}:[0-9]{2}$",
+            "description": "Смещение относительно UTC (часы:минуты)."
           }
-        },
-        "required": ["iso", "utc", "epochMs", "timezone"]
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok"],
+            "description": "Статус работоспособности сервиса."
+          }
+        }
       }
     }
   }

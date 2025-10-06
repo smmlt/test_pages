@@ -1,7 +1,7 @@
 {
   "name": "test_pages",
   "version": "1.0.0",
-  "description": "Simple server returning server date/time with Swagger docs",
+  "description": "Simple server that returns server date/time and Swagger documentation.",
   "homepage": "https://github.com/ninydev/test_pages#readme",
   "bugs": {
     "url": "https://github.com/ninydev/test_pages/issues"
@@ -18,9 +18,5 @@
     "start": "node src/server.js",
     "dev": "NODE_ENV=development node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "swagger-ui-express": "^5.0.1"
   }
 }

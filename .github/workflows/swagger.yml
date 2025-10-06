@@ -1,0 +1,83 @@
+# Deploy Swagger (OpenAPI) documentation to GitHub Pages
+name: Deploy Swagger Docs to Pages
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/openapi.json"
+      - ".github/workflows/swagger.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build Swagger UI site
+        run: |
+          set -e
+          mkdir -p public
+          cp src/openapi.json public/openapi.json
+          cat > public/index.html << 'EOF'
+          <!doctype html>
+          <html lang="ru">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>API Документация — Swagger UI</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
+            <style>
+              body { margin: 0; background: #fafafa; }
+              .topbar { display: none; }
+            </style>
+          </head>
+          <body>
+            <div id="swagger-ui"></div>
+            <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+            <script>
+              window.addEventListener('load', () => {
+                window.ui = SwaggerUIBundle({
+                  url: './openapi.json', // локальный файл, загружаемый в Pages
+                  dom_id: '#swagger-ui',
+                  deepLinking: true,
+                  presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+                  layout: 'BaseLayout'
+                });
+              });
+            </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
